@@ -8,6 +8,10 @@ The exceptional curves should probably be indexed by dyadic fractions, written
 as binary numbers, but we will instead clear denominators and work with
 integers. 
 """
+
+from fractions import Fraction
+
+
 # Enter initial ramification data.
 # The ramification cover of the curve i is gi copies of zi modulo n
 initial_ram_data = input("Please enter the ramification data tuple n,z1,z2,g1,g2\n")
@@ -47,8 +51,8 @@ def resolve(n,z1,z2,g1,g2):
     no_blowups = max(g1,g2)*n -1
     # crude bound on number of blowups to ensure good log resolution
     print(f'We need to blowup set of nodes  at most {no_blowups} times.')
-    no_curves = 2**no_blowups # number of exc curves actuall 2**no_blowups -1
-    curves = {0:[1/(f1*g1)-1,z1] , no_curves:[1/(f2*g2)-1,z2]}
+    no_curves = 2**no_blowups # number of exc curves actually 2**no_blowups -1
+    curves = {0:[Fraction(1,f1*g1)-1,z1] , no_curves:[Fraction(1,f2*g2)-1,z2]}
     # Create dictionary of curve data. Keys are 0 up to no_curves.
     # Current values are lists of [log discrepancy, ram of max order] 
     step = no_curves # Final indices for strict transforms of initial ram 
@@ -57,7 +61,7 @@ def resolve(n,z1,z2,g1,g2):
     
     for i in range(1,no_blowups+1):
 
-        print(f'This is the {i}-th blowup. New curves have  log and b- discrepancy')
+        print(f'This is the {i}-th blowup. New curves have  log and b- discrepancy and ramification:')
         step = int(step/2) # indices of i-th blowup curves have indices 'step' apart
         l = len(curves)-1 # the number of new exceptional curves
         is_good_res = True
@@ -69,11 +73,11 @@ def resolve(n,z1,z2,g1,g2):
             is_good_res =  is_good_res and (log_disc >=0)
             ram = (curves[2*j*step][1] + curves[(2*j+2)*step][1])%n
             # Gives ramification along j-th new exceptional in i-th blowup
-            b_disc = log_disc + 1-1/order(ram,n)
+            b_disc = log_disc + 1-Fraction(1,order(ram,n))
             # Compute the b-discrepancy
             curves[(2*j +1)*step] = [log_disc, ram, b_disc]
             # Update curves dictionary with entry for j-th curve in i-th blowup
-            print(log_disc,b_disc, end=';')
+            print(log_disc,b_disc, ram, end=';')
 
         if is_good_res:
             break
