@@ -68,7 +68,7 @@ def resolve(n,z1,z2,g1,g2):
  #       print(f'This is the {i}-th blowup. New curves have  log and b- discrepancy and ramification:')
         l = len(curves)-1 # the number of new exceptional curves
        
-        oldcurves = set(curves.keys()).difference({0,no_curves})
+        oldcurves = set(curves.keys()).difference({0,no_curves})  # Gives indices for exceptionals in previous iteration
         for index in oldcurves:
             curves[index] = [curves[index][0], curves[index][1], curves[index][2],curves[index][3]-2]                                                         
         step = int(step/2) # indices of i-th blowup curves have indices 'step' apart
@@ -91,8 +91,8 @@ def resolve(n,z1,z2,g1,g2):
         if is_good_res:
             break
             #print(' DONE', end='\n\n')
-    indices = sorted(curves)
-    curvesList = [ curves[i] for i in indices]
+    indices = sorted(curves)  
+    curvesList = [ curves[i] for i in indices] # Create list from dictionary so not dyadic indices.
     curvesList[0].extend([0,0])
     curvesList[len(curvesList)-1].extend([0,0])
     #print(curvesList)    
@@ -101,7 +101,9 @@ def resolve(n,z1,z2,g1,g2):
 
 def toNegativeFractions(sequence):
     return [-Fraction(x,1) for x in sequence]
-    
+
+#This functions inputs a sequence of integers appearing 
+#in a continued fraction and spits out the actual fraction. 
 def HJcontinuedFraction(sequence):
 #    print(sequence)
     if len(sequence) == 1:
@@ -111,12 +113,21 @@ def HJcontinuedFraction(sequence):
         first = sequence.pop(0)
         return first-1/HJcontinuedFraction(sequence)
     
+# Input sequence of negatives of self-intersections of 
+# string of exceptionals, returns cyclic group action
+# (1,b)/r
 def cyclicGroup(seq):
     frac = HJcontinuedFraction(toNegativeFractions(seq))
     r = frac.numerator
     b = frac.denominator
     return([r,1,b])
 
+# Input list of curves with ramification & 
+# self-intersection data. We contract (-1)-curves
+# with negative b-disc. I'm worried that on contracting 
+# the i-th exceptional, the (i-1)-st exceptional becomes 
+# a (-1)-curve which should be contracted but misses out
+# as i only increases. 
 def contract2smooth(curves):
     noCurves=len(curves)
     i = 1
@@ -125,6 +136,7 @@ def contract2smooth(curves):
 #            print(i)
             noCurves=len(curves)
             curves[min(i+1,noCurves-2)][3] += 1
+            # Confused about use of min above and max below.
             curves[max(i-1,1)][3] += 1
             curves.pop(i)
      #       print([x[3] for x in curves])        
@@ -133,6 +145,7 @@ def contract2smooth(curves):
         else:
             i += 1
     return curves
+
 
 def contract2min(curves):
     # scan until you find a b des >= 0
